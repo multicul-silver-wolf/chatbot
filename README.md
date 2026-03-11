@@ -36,15 +36,12 @@
 
 ## Model Providers
 
-This template uses the [Vercel AI Gateway](https://vercel.com/docs/ai-gateway) to access multiple AI models through a unified interface. The default model is [OpenAI](https://openai.com) GPT-4.1 Mini, with support for Anthropic, Google, and xAI models.
+This fork uses [DeepSeek](https://platform.deepseek.com) directly through the AI SDK OpenAI-compatible provider.
 
-### AI Gateway Authentication
+### DeepSeek Authentication
 
-**For Vercel deployments**: Authentication is handled automatically via OIDC tokens.
-
-**For non-Vercel deployments**: You need to provide an AI Gateway API key by setting the `AI_GATEWAY_API_KEY` environment variable in your `.env.local` file.
-
-With the [AI SDK](https://ai-sdk.dev/docs/introduction), you can also switch to direct LLM providers like [OpenAI](https://openai.com), [Anthropic](https://anthropic.com), [Cohere](https://cohere.com/), and [many more](https://ai-sdk.dev/providers/ai-sdk-providers) with just a few lines of code.
+Set `DEEPSEEK_API_KEY` in your `.env.local` for local/non-Vercel deployments.
+You can optionally set `DEEPSEEK_BASE_URL` (default: `https://api.deepseek.com/v1`).
 
 ## Deploy Your Own
 

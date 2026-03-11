@@ -1,4 +1,4 @@
-import { gateway } from "@ai-sdk/gateway";
+import { createOpenAI } from "@ai-sdk/openai";
 import {
   customProvider,
   extractReasoningMiddleware,
@@ -6,7 +6,15 @@ import {
 } from "ai";
 import { isTestEnvironment } from "../constants";
 
-const THINKING_SUFFIX_REGEX = /-thinking$/;
+const DEEPSEEK_BASE_URL =
+  process.env.DEEPSEEK_BASE_URL ?? "https://api.deepseek.com/v1";
+
+const DEEPSEEK_API_KEY = process.env.DEEPSEEK_API_KEY;
+
+const deepseek = createOpenAI({
+  apiKey: DEEPSEEK_API_KEY,
+  baseURL: DEEPSEEK_BASE_URL,
+});
 
 export const myProvider = isTestEnvironment
   ? (() => {
@@ -27,37 +35,61 @@ export const myProvider = isTestEnvironment
     })()
   : null;
 
+function resolveDeepSeekModel(modelId: string) {
+  const normalized = modelId.toLowerCase();
+
+  if (
+    normalized.includes("reasoning") ||
+    normalized.includes("thinking") ||
+    normalized.includes("reasoner")
+  ) {
+    return "deepseek-reasoner";
+  }
+
+  return "deepseek-chat";
+}
+
+function assertDeepSeekKey() {
+  if (!DEEPSEEK_API_KEY) {
+    throw new Error(
+      "DEEPSEEK_API_KEY is missing. Please set it in .env.local for non-test environments."
+    );
+  }
+}
+
 export function getLanguageModel(modelId: string) {
   if (isTestEnvironment && myProvider) {
     return myProvider.languageModel(modelId);
   }
 
-  const isReasoningModel =
-    modelId.endsWith("-thinking") ||
-    (modelId.includes("reasoning") && !modelId.includes("non-reasoning"));
+  assertDeepSeekKey();
 
-  if (isReasoningModel) {
-    const gatewayModelId = modelId.replace(THINKING_SUFFIX_REGEX, "");
+  const resolved = resolveDeepSeekModel(modelId);
 
+  if (resolved === "deepseek-reasoner") {
     return wrapLanguageModel({
-      model: gateway.languageModel(gatewayModelId),
+      model: deepseek.languageModel(resolved),
       middleware: extractReasoningMiddleware({ tagName: "thinking" }),
     });
   }
 
-  return gateway.languageModel(modelId);
+  return deepseek.languageModel(resolved);
 }
 
 export function getTitleModel() {
   if (isTestEnvironment && myProvider) {
     return myProvider.languageModel("title-model");
   }
-  return gateway.languageModel("google/gemini-2.5-flash-lite");
+
+  assertDeepSeekKey();
+  return deepseek.languageModel("deepseek-chat");
 }
 
 export function getArtifactModel() {
   if (isTestEnvironment && myProvider) {
     return myProvider.languageModel("artifact-model");
   }
-  return gateway.languageModel("anthropic/claude-haiku-4.5");
+
+  assertDeepSeekKey();
+  return deepseek.languageModel("deepseek-chat");
 }
