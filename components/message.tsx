@@ -262,6 +262,87 @@ const PurePreviewMessage = ({
               );
             }
 
+            if (type === "tool-hitlDemoAction") {
+              const { toolCallId, state } = part;
+              const approvalId = (part as { approval?: { id: string } })
+                .approval?.id;
+              const isDenied =
+                state === "output-denied" ||
+                (state === "approval-responded" &&
+                  (part as { approval?: { approved?: boolean } }).approval
+                    ?.approved === false);
+
+              if (state === "output-available") {
+                return (
+                  <Tool defaultOpen={true} key={toolCallId}>
+                    <ToolHeader state={state} type="tool-hitlDemoAction" />
+                    <ToolContent>
+                      <ToolOutput
+                        errorText={undefined}
+                        output={<pre>{JSON.stringify(part.output, null, 2)}</pre>}
+                      />
+                    </ToolContent>
+                  </Tool>
+                );
+              }
+
+              if (isDenied) {
+                return (
+                  <Tool defaultOpen={true} key={toolCallId}>
+                    <ToolHeader state="output-denied" type="tool-hitlDemoAction" />
+                    <ToolContent>
+                      <div className="px-4 py-3 text-muted-foreground text-sm">
+                        HITL demo action was denied.
+                      </div>
+                    </ToolContent>
+                  </Tool>
+                );
+              }
+
+              return (
+                <Tool defaultOpen={true} key={toolCallId}>
+                  <ToolHeader state={state} type="tool-hitlDemoAction" />
+                  <ToolContent>
+                    {(state === "input-available" ||
+                      state === "approval-requested" ||
+                      state === "approval-responded") && (
+                      <ToolInput input={part.input} />
+                    )}
+
+                    {state === "approval-requested" && approvalId && (
+                      <div className="flex items-center justify-end gap-2 border-t px-4 py-3">
+                        <button
+                          className="rounded-md px-3 py-1.5 text-muted-foreground text-sm transition-colors hover:bg-muted hover:text-foreground"
+                          onClick={() => {
+                            addToolApprovalResponse({
+                              id: approvalId,
+                              approved: false,
+                              reason: "User denied HITL demo action",
+                            });
+                          }}
+                          type="button"
+                        >
+                          Deny
+                        </button>
+                        <button
+                          className="rounded-md bg-primary px-3 py-1.5 text-primary-foreground text-sm transition-colors hover:bg-primary/90"
+                          onClick={() => {
+                            addToolApprovalResponse({
+                              id: approvalId,
+                              approved: true,
+                            });
+                          }}
+                          type="button"
+                        >
+                          Approve
+                        </button>
+                      </div>
+                    )}
+                  </ToolContent>
+                </Tool>
+              );
+            }
+
             if (type === "tool-createDocument") {
               const { toolCallId } = part;
 

@@ -39,7 +39,13 @@ Do not update document right after creating it. Wait for user feedback or reques
 
 export const regularPrompt = `You are a friendly assistant! Keep your responses concise and helpful.
 
-When asked to write, create, or help with something, just do it directly. Don't ask clarifying questions unless absolutely necessary - make reasonable assumptions and proceed with the task.`;
+When asked to write, create, or help with something, just do it directly. Don't ask clarifying questions unless absolutely necessary - make reasonable assumptions and proceed with the task.
+
+Human-in-the-loop demo rules:
+- For high-risk or irreversible requests (e.g. deleting production data, sending external communications, changing billing/credentials/permissions), call "hitlDemoAction" first.
+- If user explicitly includes "[HITL]", always call "hitlDemoAction".
+- This tool requires human approval. After approval, continue and summarize execution result.
+- If denied, explain that execution was blocked by human approval policy.`;
 
 export type RequestHints = {
   latitude: Geo["latitude"];
