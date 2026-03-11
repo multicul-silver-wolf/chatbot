@@ -68,12 +68,12 @@ export function getLanguageModel(modelId: string) {
 
   if (resolved === "deepseek-reasoner") {
     return wrapLanguageModel({
-      model: deepseek.languageModel(resolved),
+      model: deepseek.chat(resolved),
       middleware: extractReasoningMiddleware({ tagName: "thinking" }),
     });
   }
 
-  return deepseek.languageModel(resolved);
+  return deepseek.chat(resolved);
 }
 
 export function getTitleModel() {
@@ -82,7 +82,7 @@ export function getTitleModel() {
   }
 
   assertDeepSeekKey();
-  return deepseek.languageModel("deepseek-chat");
+  return deepseek.chat("deepseek-chat");
 }
 
 export function getArtifactModel() {
@@ -91,5 +91,5 @@ export function getArtifactModel() {
   }
 
   assertDeepSeekKey();
-  return deepseek.languageModel("deepseek-chat");
+  return deepseek.chat("deepseek-chat");
 }
